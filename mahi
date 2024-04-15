@@ -1,1 +1,509 @@
+1
+------------------------------------------------
+import java.util.Scanner;
+
+public class CaesarCipher {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the Plain Text:");
+        String plainText = sc.nextLine().toLowerCase();
+
+        System.out.println("Enter the shift value (0-25):");
+        int shift = sc.nextInt();
+
+        String encryptedText = encrypt(plainText, shift);
+        System.out.println("Encrypted Text: " + encryptedText);
+
+        System.out.println("Possible Plain Texts:");
+        for (int key = 0; key < 26; key++) {
+            System.out.println("For Key " + key + ": " + decrypt(encryptedText, key));
+        }
+    }
+
+    public static String encrypt(String text, int shift) {
+        StringBuilder result = new StringBuilder();
+        for (char ch : text.toCharArray()) {
+            if (Character.isLetter(ch)) {
+                char base = Character.isUpperCase(ch) ? 'A' : 'a';
+                char encryptedChar = (char) ((ch - base + shift) % 26 + base);
+                result.append(encryptedChar);
+            } else {
+                result.append(ch);
+            }
+        }
+        return result.toString();
+    }
+
+    public static String decrypt(String text, int shift) {
+        return encrypt(text, 26 - shift);
+    }
+}
+----------------------------------
+2
+--------------------------------
+import java.util.Scanner;
+public class MonalphabeticCipher 
+{
+    public static char p[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+    public static char ch[] = {'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M'};
+    public static String doEncryption(String si) 
+    {
+        char el[] = new char[si.length()];
+        for (int i = 0; i < si.length(); i++) {
+            for (int j = 0; j < 26; j++) {
+                if (p[j] == si.charAt(i)) {
+                    el[i] = ch[j];
+                    break;
+                }
+            }
+        }
+        return new String(el);
+    }
+
+    public static String doDecryption(String sj) {
+        char p1[] = new char[sj.length()];
+        for (int i = 0; i < sj.length(); i++) {
+            for (int j = 0; j < 26; j++) {
+                if (ch[j] == sj.charAt(i)) {
+                    p1[i] = p[j];
+                    break;
+                }
+            }
+        }
+        return new String(p1);
+    }
+
+    public static void main(String args[]) 
+    {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the message: ");
+        String str = sc.next().toLowerCase();
+        String en = doEncryption(str);
+        System.out.println("Encrypted message: " + en);
+        System.out.println("Decrypted message: " + doDecryption(en));
+        sc.close();
+    }
+}
+-------------------------------------
+4
+AES
+--------------------------
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.util.Base64;
+
+class AesEncrypter
+{
+    Cipher ecipher, dcipher;
+    AesEncrypter(SecretKey key) throws Exception
+    {
+        ecipher = Cipher.getInstance("AES");
+        dcipher = Cipher.getInstance("AES");
+        ecipher.init(Cipher.ENCRYPT_MODE, key);
+        dcipher.init(Cipher.DECRYPT_MODE, key);
+    }
+    public String encrypt(String str) throws Exception
+    {
+        byte[] utf8 = str.getBytes("UTF8");
+        byte[] enc = ecipher.doFinal(utf8);
+        return Base64.getEncoder().encodeToString(enc);
+    }
+    public String decrypt(String str) throws Exception
+    {
+        byte[] dec = Base64.getDecoder().decode(str);
+        byte[] utf8 = dcipher.doFinal(dec);
+        return new String(utf8, "UTF8");
+    }
+}
+public class AES
+{
+    public static void main (String[] args) throws Exception
+    {
+        SecretKey key = KeyGenerator.getInstance("AES").generateKey();
+        AesEncrypter encrypter = new AesEncrypter(key);
+        String encrypted = encrypter.encrypt("Don't tell anybody!");
+        System.out.println(encrypted);
+        String decrypted = encrypter.decrypt(encrypted);
+        System.out.println(decrypted);
+    }
+}
+OUTPUT
+--------------------------
+ifeWXDxvwMHCXG+mFOrDSQ8unTSovKXfALnN6Z406Rs=
+Don't tell anybody!
+
+
+DES
+--------------------------
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
+class DES{
+    public static void main(String[] args) throws Exception
+    {
+        SecretKey key = KeyGenerator.getInstance("DES").generateKey();
+        DesEncrypter encrypter = new DesEncrypter(key);
+        String encrypted = encrypter.encrypt("Don't tell anybody");
+        System.out.println(encrypted);
+        String decrypted = encrypter.decrypt(encrypted);
+        System.out.println(decrypted);
+    }
+}
+class DesEncrypter
+{
+    Cipher ecipher;
+    Cipher dcipher;
+    DesEncrypter(SecretKey key) throws Exception
+    {
+        ecipher = Cipher.getInstance("DES");
+        dcipher = Cipher.getInstance("DES");
+        ecipher.init(Cipher.ENCRYPT_MODE,key);
+        dcipher.init(Cipher.DECRYPT_MODE,key);
+    }
+    public String encrypt(String str)throws Exception
+    {
+        byte[] utf8 = str.getBytes("UTF8");
+        byte[] enc = ecipher.doFinal(utf8);
+        return Base64.getEncoder().encodeToString(enc);
+    }
+    public String decrypt(String str)throws Exception
+    {
+        byte[] dec = Base64.getDecoder().decode(str);
+        byte[] utf8 = dcipher.doFinal(dec);
+        return new String(utf8,"UTF8");
+    }
+}
+OUTPUT
+--------------------------
+wi0kc5vJBLVKmCbTkYJwWYTOmRGGjm5k
+Don't tell anybody
+
+
+DEFFIE HELLMAN
+--------------------------
+Server side
+--------------
+import java.io.*;
+import java.net.*;
+public class DHServer
+{
+   public static void main(String[] args) throws IOException
+   {
+       try
+       {
+           int port = 8088;
+           // Server Key
+           int b = 3;
+           // Client p, g, and key
+           double clientP, clientG, clientA, B, Bdash;
+           String Bstr;
+           // Established the Connection
+           ServerSocket serverSocket = new ServerSocket(port);
+           System.out.println("Waiting for client on port " + serverSocket.getLocalPort());
+           Socket server = serverSocket.accept();
+           System.out.println("Just connected to " + server.getRemoteSocketAddress());
+           // Server's Private Key
+           System.out.println("From Server: Private Key=" + b);
+           // Accepts the data from client
+           DataInputStream in = new DataInputStream(server.getInputStream());
+           clientP = Integer.parseInt(in.readUTF()); // to accept p
+           System.out.println("From Client: P=" + clientP);
+           clientG = Integer.parseInt(in.readUTF()); // to accept g
+           System.out.println("From Client: G=" + clientG);
+           clientA = Double.parseDouble(in.readUTF()); // to accept A
+           System.out.println("From Client: Public Key = " + clientA);
+           B = ((Math.pow(clientG, b)) % clientP); // calculation of B
+           Bstr = Double.toString(B);
+           // Sends data to client
+           // Value of B
+           OutputStream outToclient = server.getOutputStream();
+           DataOutputStream out = new DataOutputStream(outToclient);
+           server.close();
+           out.writeUTF(Bstr); // Sending B
+           Bdash = ((Math.pow(clientA, b)) % clientP); // calculation of Bdash
+           System.out.println("Secret Key to perform Symmetric Encryption=" + Bdash);
+       }
+       catch (SocketTimeoutException s)
+       {
+           System.out.println("Socket timed out!");
+       }
+       catch (IOException e)
+       {
+           System.out.println("Socket timed out!");
+       }
+   }
+}
+
+
+
+Client Side
+--------------
+import java.net.*;
+import java.io.*;
+
+public class DHClient
+{
+   public static void main(String[] args)
+   {
+       try
+       {
+           String pstr, gstr, Astr;
+           String serverName= "localhost";
+           int port = 8088;
+           // Declare p, g, and Key of client
+           int p = 23;
+           int g = 9;
+           int a = 4;
+           double Adash, serverB;
+           // Establish the connection.
+           System.out.println("Connecting to " + serverName + " on port " + port);
+           Socket client = new Socket(serverName, port);
+           System.out.println("Just connected to " + client.getRemoteSocketAddress());
+           // Send the data to client
+           OutputStream outToServer = client.getOutputStream();
+           DataOutputStream out = new DataOutputStream(outToServer);
+           pstr = Integer.toString(p);
+           out.writeUTF(pstr); // Send p
+           gstr = Integer.toString(g);
+           out.writeUTF(gstr); // Send g
+           double A = (Math.pow(g, a)) % p; // Calculation of A
+           Astr = Double.toString(A);
+           out.writeUTF(Astr); // Send A
+           // Client's Private Key
+           System.out.println("From Client: Private Key = " + a);
+           // Accepts the data
+           DataInputStream in = new DataInputStream(client.getInputStream());
+           // Get server's public key
+           serverB = Double.parseDouble(in.readUTF());
+           System.out.println("From Server: Public Key = " + serverB);
+           // Calculation of secret key
+           client.close();
+           Adash = (Math.pow(serverB, a)) % p;
+           System.out.println("Secret Key to perform Symmetric Encryption=" + Adash);
+       }
+       catch (Exception e)
+       {
+           e.printStackTrace();
+       }
+   }
+}
+OUTPUT
+--------------------------
+Server side
+-----------
+Waiting for client on port 8088
+
+
+
+Client side
+-----------
+Waiting for client on port 8088
+Just connected to /127.0.0.1:51252
+From Server: Private Key=3
+From Client: P=23.0
+From Client: G=9.0
+From Client: Public Key = 6.0
+Socket timed out!
+
+
+
+RSA
+--------------------------
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.*;
+public class RSADemo
+{
+   private final static BigInteger one = new BigInteger("1");
+   private final static SecureRandom random = new SecureRandom();
+   private BigInteger privatekey;
+   private BigInteger publicKey;
+   private BigInteger modulus;
+   // generate an N-bit (roughly) public and private key
+   RSADemo(int N)
+   {
+       BigInteger p = BigInteger.probablePrime(N / 2, random);
+       BigInteger q = BigInteger.probablePrime(N / 2, random);
+       BigInteger phi = (p.subtract(one)).multiply(q.subtract(one));
+       System.out.println("prime p= " + p);
+       System.out.println("prime q='" + q);
+       modulus=p.multiply(q);
+       System.out.println("phi=" + phi);
+       publicKey = new BigInteger("65537"); // common value in practice - 2^16+1
+       privatekey = publicKey.modInverse(phi);
+       System.out.println();
+   }
+   BigInteger encrypt(BigInteger message)
+   {
+       return message.modPow(publicKey, modulus);
+   }
+   BigInteger decrypt(BigInteger encrypted)
+   {
+       return encrypted.modPow(privatekey, modulus);
+   }
+   public String toString()
+   {
+       String s = "";
+       s += "public " + publicKey + "\n";
+       s += "private=" + privatekey + "\n";
+       s += "modulus=" + modulus;
+       return s;
+   }
+   public static void main(String args[])
+   {
+       Scanner sc=new Scanner(System.in);
+       System.out.println("Enter bit length of key:");
+       int N = sc.nextInt();
+       RSADemo key = new RSADemo(N);
+       System.out.println(key);
+       // create random message, encrypt and decrypt.
+       BigInteger message = new BigInteger("8"); // create message by converting string to integer
+       BigInteger encrypt = key.encrypt(message);
+       BigInteger decrypt = key.decrypt(encrypt);
+       System.out.println("message " + message);
+       System.out.println("encrypted " + encrypt);
+       System.out.println("decrypted " + decrypt);
+   }
+}
+OUTPUT
+--------------------------
+Enter bit length of key:
+10
+prime p= 23
+prime q='17
+phi=352
+public 65537
+private=65
+modulus=391
+message 8
+encrypted 348
+decrypted 8
+
+
+
+MD5
+--------------------------
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+
+public class Md5
+{
+      public static String getMd5(String input)
+      {
+            try
+            {
+                  MessageDigest md=MessageDigest.getInstance("MD5");
+                  byte[] messageDigest=md.digest(input.getBytes());
+                  BigInteger no=new BigInteger(1,messageDigest);
+                  String hashtext = no.toString(16);
+                  while(hashtext.length()<32)
+                  {
+                        hashtext="0"+hashtext;
+                  }
+                  return hashtext;
+            }
+            catch(NoSuchAlgorithmException e)
+            {
+                  throw new RuntimeException(e);
+            }
+      }
+      public static void main(String args[])throws NoSuchAlgorithmException
+      {
+            Scanner ob =new Scanner(System.in);
+            System.out.print("Enter a Text:");
+            String s=ob.nextLine();
+            System.out.println("Hashcode generated by MD5 is:"+getMd5(s));
+      }
+
+}
+OUTPUT
+--------------------------
+Enter a Text:VVIT
+Hashcode generated by MD5 is:ea0e35a36c30df9ce6963d4dcbae426d
+
+
+
+SHA
+--------------------------
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+
+public class SHA
+{
+      public static String getSHA(String input)
+      {
+            try
+            {
+                  MessageDigest hash=MessageDigest.getInstance("SHA-256");
+                  byte[] messageDigest=hash.digest(input.getBytes());
+                  BigInteger no=new BigInteger(1,messageDigest);
+                  String hashtext = no.toString(16);
+                  while(hashtext.length()<32)
+                  {
+                        hashtext="0"+hashtext;
+                  }
+                  return hashtext;
+            }
+            catch(NoSuchAlgorithmException e)
+            {
+                  throw new RuntimeException(e);
+            }
+      }
+      public static void main(String args[])throws NoSuchAlgorithmException
+      {
+            Scanner ob =new Scanner(System.in);
+            System.out.print("Enter a Text:");
+            String s=ob.nextLine();
+            System.out.println("Hashcode generated by SHA is:"+getSHA(s));
+      }
+}
+OUTPUT
+--------------------------
+Enter a Text:VVIT
+Hashcode generated by SHA is:4648713776340a1d8933bd6079d6440d120204deb21bde2ae2535022ff19607f
+
+3) One time pad
+
+import java.util.Scanner;
+
+public class exp2 {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter plaintext: ");
+        String pt = sc.nextLine();
+        System.out.print("Enter key: ");
+        String key = sc.nextLine();
+        if (pt.length() != key.length()) {
+            System.out.println("Key length must be equal to plaintext length");
+            return;
+        }
+        StringBuilder ct = new StringBuilder();
+        for (int i = 0; i < pt.length(); i++) {
+            char ec = (char)(pt.charAt(i) ^ key.charAt(i));
+            ct.append(ec);
+        }
+        System.out.print("Encrypted text (raw): ");
+for (int i = 0; i < ct.length(); i++) {
+    System.out.print(Integer.toBinaryString((int)ct.charAt(i)) + " ");
+}
+System.out.println(); 
+
+        //System.out.println("Encrypted text: " + ct.toString());
+        StringBuilder dt = new StringBuilder();
+        for (int i = 0; i < ct.length(); i++) {
+            char dc = (char) (ct.charAt(i) ^ key.charAt(i));
+            dt.append(dc);
+        }
+        System.out.println("Decrypted text: " + dt.toString());
+    }
+}
+
 
